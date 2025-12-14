@@ -1,6 +1,2 @@
-namespace ElevatorApi.Tests;
-
-public class Usings
-{
-    
-}
+global using ElevatorApi.Api.Models;
+global using ElevatorApi.Api.Services;

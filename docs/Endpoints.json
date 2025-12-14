@@ -1,0 +1,148 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Alaska Elevator Api",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "https://api.server.test/v1"
+        }
+    ],
+    "components": {
+        "schemas": {
+            "CarResponse": {
+                "type": "object",
+                "required": [
+                    "carId"
+                ],
+                "properties": {
+                    "carId": {
+                        "type": "integer"
+                    },
+                    "destinations": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "nextFloor": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/cars/{carId}/destinations/{floorNumber}": {
+            "put": {
+                "description": "Assigns a floor to a car's list of destinations",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "carId",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "floorNumber",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CarResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cars/{carId}": {
+            "get": {
+                "description": "Returns an elevator car",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "carId",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CarResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cars/call": {
+            "post": {
+                "description": "Calls a car to a floor",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "floorNumber",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the assigned car",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CarResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cars/{carId}/move": {
+            "post": {
+                "description": "moves a car to its next floor",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "floorNumber",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}
