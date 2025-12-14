@@ -29,8 +29,7 @@ public class CarRepository : ICarRepository
             {
                 Cars.TryAdd(id, new Car(
                     id, 
-                    SettingsOptions.Value.LobbyFloor, 
-                    CarStatus.Idle));
+                    SettingsOptions.Value.LobbyFloor));
                
             }
         }

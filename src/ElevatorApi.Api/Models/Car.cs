@@ -4,23 +4,21 @@ using Microsoft.VisualBasic;
 
 namespace ElevatorApi.Api.Models;
 
-public sealed class Car: IEquatable<Car>
+public sealed class Car : IEquatable<Car>
 {
-    internal Car(byte id, sbyte initialFloor, CarStatus initialStatus = CarStatus.Idle)
+
+    internal Car(byte id, sbyte initialFloor)
     {
         Id = id;
         CurrentFloor = initialFloor;
-        Status = initialStatus ;
-        DestinationFloors = new List<sbyte>();
+        Stops = new List<sbyte>();
     }
     
     public byte Id { get;  }
-    public IReadOnlyCollection<sbyte> DestinationFloors { get; }
+    public IReadOnlyCollection<sbyte> Stops { get; }
     public sbyte CurrentFloor { get; private set; }
     public sbyte? NextFloor{ get; private set; }
-
-    public CarStatus Status  { get; private set; }
-
+    
     public bool Equals(Car? other)
     {
         return  other != null && Id == other.Id;

@@ -32,14 +32,14 @@ public class CarRepositoryTests
             });
 
         var expected = Enumerable.Range(1, carCount)
-            .Select(id => new Car((byte)id, 0, CarStatus.Idle))
+            .Select(id => new Car((byte)id, 0))
             .ToList().AsReadOnly();
 
         var actual = Sut.GetAll();
 
         Assert.That(actual, Is.EquivalentTo(expected));
     }
-    
+
     public void GetAll_MultipleCars_SetsDefaults(sbyte initialFloor)
     {
         SettingsOptions.Setup(x => x.Value)
@@ -50,12 +50,7 @@ public class CarRepositoryTests
             });
 
         var actual = Sut.GetAll();
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(actual.All(a => a.CurrentFloor == -1), Is.True);
-            Assert.That(actual.All(a => a.Status == CarStatus.Idle), Is.True);
-        });
+        Assert.That(actual.All(a => a.CurrentFloor == -1), Is.True);
     }
 
     #endregion
@@ -72,7 +67,7 @@ public class CarRepositoryTests
                 LobbyFloor = 1
             });
 
-        var expected = new Car(2, 1, CarStatus.Idle);
+        var expected = new Car(2, 1);
         var actual = Sut.GetById(expected.Id);
 
         Assert.That(actual, Is.Not.Null);
@@ -82,8 +77,6 @@ public class CarRepositoryTests
             Assert.That(actual, Is.EqualTo(expected));
             Assert.That(actual.CurrentFloor,
                 Is.EqualTo(1));
-            Assert.That(actual.Status,
-                Is.EqualTo(CarStatus.Idle));
         });
     }
 
