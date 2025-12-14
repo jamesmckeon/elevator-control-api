@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 namespace ElevatorApi.Tests.Models;
 
 [Category("Unit")]
@@ -86,11 +88,37 @@ public class CarTests
     }
 
     [Test]
-    public void AddStop_NoStops_ReturnsExpectedState()
+    public void AddStop_ValidFloorNumber_ReturnsExpectedCurrentFloor()
     {
         var car = new Car(1, 0, 0, 10);
 
-        Assert.That(car.NextFloor, Is.Null);
+        car.AddStop(1);
+        Assert.That(car.CurrentFloor, Is.EqualTo(1));
+    }
+
+    [TestCase(new sbyte[] { 1, 2 }, new sbyte[] { 1, 2 })]
+    [TestCase(new sbyte[] { 2, 1 }, new sbyte[] { 1, 2 })]
+    [TestCase(new sbyte[] { 2 }, new sbyte[] { 2 })]
+    [TestCase(new sbyte[] { 2, 2 }, new sbyte[] { 2 })]
+    [TestCase(new sbyte[] { 2, -2, 2 }, new sbyte[] { 2, -2 })]
+    [TestCase(new sbyte[] { 1, 2, -2 }, new sbyte[] { 1, 2, -2 })]
+    [TestCase(new sbyte[] { 1, -2, 2 }, new sbyte[] { 1, 2, -2 })]
+    [TestCase(new sbyte[] { -1, -2 }, new sbyte[] { -1, -2 })]
+    [TestCase(new sbyte[] { -2, -1 }, new sbyte[] { -1, -2 })]
+    [TestCase(new sbyte[] { -2, -1, 1 }, new sbyte[] { -1, -2, 1 })]
+    [TestCase(new sbyte[] { -2, -1, 4, 10, 8, 0, 3, -2, 4 }, new sbyte[] { -1, -2, 3, 4, 8, 10 })]
+    public void AddStop_ValidFloors_ReturnsExpectedStops(sbyte[] input, sbyte[] expected)
+    {
+        ArgumentNullException.ThrowIfNull(input);
+
+        var car = new Car(1, 0, -2, 10);
+
+        foreach (var stop in input)
+        {
+            car.AddStop(stop);
+        }
+
+        Assert.That(car.Stops, Is.EqualTo(expected));
     }
 
     #endregion
