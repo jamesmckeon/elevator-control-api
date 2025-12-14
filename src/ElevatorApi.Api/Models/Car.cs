@@ -6,25 +6,31 @@ namespace ElevatorApi.Api.Models;
 
 public sealed class Car : IEquatable<Car>
 {
-
-    internal Car(byte id, sbyte initialFloor)
+    internal Car(byte id, sbyte initialFloor, sbyte minFloor, sbyte maxFloor)
     {
+        if (minFloor >= maxFloor)
+        {
+            throw new ArgumentOutOfRangeException(nameof(minFloor), 
+                "minFloor must be less than maxFloor.");
+        }
+
         Id = id;
         CurrentFloor = initialFloor;
+        FloorRange = (minFloor, maxFloor);
         Stops = new List<sbyte>();
     }
-    
-    public byte Id { get;  }
+
+    private (sbyte MinFloor, sbyte MaxFloor) FloorRange { get; }
+    public byte Id { get; }
     public IReadOnlyCollection<sbyte> Stops { get; }
     public sbyte CurrentFloor { get; private set; }
-    public sbyte? NextFloor{ get; private set; }
-    
+    public sbyte? NextFloor { get; private set; }
+
     public bool Equals(Car? other)
     {
-        return  other != null && Id == other.Id;
-
+        return other != null && Id == other.Id;
     }
-    
+
     public override int GetHashCode()
     {
         return Id.GetHashCode();
@@ -39,13 +45,9 @@ public sealed class Car : IEquatable<Car>
     {
         throw new NotImplementedException();
     }
-    
-    // cars need to be instantiated at floor 1 by default
-    /* call car, car is on floor already
-     * cars need to be instantiated with first floor (or lobby -- add lobby floor # to appsettings)
-     * next floor = 1st floor
-     * last floor = null
-     * client sets car destination
-     * 
-     */
+
+    public void AddStop(sbyte floorNumber)
+    {
+        throw new NotImplementedException();
+    }
 }
