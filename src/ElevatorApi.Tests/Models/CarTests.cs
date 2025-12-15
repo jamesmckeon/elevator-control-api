@@ -1,8 +1,11 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ElevatorApi.Tests.Models;
 
 [Category("Unit")]
+// arrays aren't reused between methods
+[SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments")]
 public class CarTests
 {
     #region Equals
@@ -154,4 +157,291 @@ public class CarTests
     }
 
     #endregion
+
+    #region MoveNext
+
+    [Test]
+    public void MoveNext_NoStops_DoesntMove()
+    {
+        var car = TestCar();
+        var startFloor = car.CurrentFloor;
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(startFloor));
+            Assert.That(car.NextFloor, Is.Null);
+        });
+    }
+
+    [Test]
+    public void MoveNext_OneStop_SetsExpectedState()
+    {
+        var car = TestCar();
+
+        car.AddStop(1);
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(1));
+            Assert.That(car.NextFloor, Is.Null);
+            Assert.That(car.Stops, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void MoveNext_StopAddedInSameDirection_SetsExpectedState()
+    {
+        var car = TestCar();
+
+        car.AddStop(1);
+        car.AddStop(5);
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(1));
+            Assert.That(car.NextFloor, Is.EqualTo(5));
+            Assert.That(car.Stops, Is.EqualTo(new[] { 5 }));
+        });
+
+        car.AddStop(3);
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(3));
+            Assert.That(car.NextFloor, Is.EqualTo(5));
+            Assert.That(car.Stops, Is.EqualTo(new[] { 5 }));
+        });
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(5));
+            Assert.That(car.NextFloor, Is.Null);
+            Assert.That(car.Stops, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void MoveNext_StopAddedInOtherDirection_SetsExpectedState()
+    {
+        var car = TestCar();
+
+        car.AddStop(1);
+        car.AddStop(5);
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(1));
+            Assert.That(car.NextFloor, Is.EqualTo(5));
+            Assert.That(car.Stops, Is.EqualTo(new[] { 5 }));
+        });
+
+        car.AddStop(-1);
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(5));
+            Assert.That(car.NextFloor, Is.EqualTo(-1));
+            Assert.That(car.Stops, Is.EqualTo(new[] { -1 }));
+        });
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(-1));
+            Assert.That(car.NextFloor, Is.Null);
+            Assert.That(car.Stops, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void MoveNext_StopAddedInOtherDirectionDescending_SetsExpectedState()
+    {
+        var car = TestCar();
+
+        car.AddStop(-1);
+        car.AddStop(-2);
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(-1));
+            Assert.That(car.NextFloor, Is.EqualTo(-2));
+            Assert.That(car.Stops, Is.EqualTo(new[] { -2 }));
+        });
+
+        car.AddStop(5);
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(-2));
+            Assert.That(car.NextFloor, Is.EqualTo(5));
+            Assert.That(car.Stops, Is.EqualTo(new[] { 5 }));
+        });
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(5));
+            Assert.That(car.NextFloor, Is.Null);
+            Assert.That(car.Stops, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void MoveNext_MultipleStopsAddedInConflictingDirections_SetsExpectedState()
+    {
+        var car = TestCar();
+
+        car.AddStop(-1);
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(-1));
+            Assert.That(car.NextFloor, Is.Null);
+            Assert.That(car.Stops, Is.Empty);
+        });
+
+        car.AddStop(5);
+        car.AddStop(-2);
+        car.AddStop(0);
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(-2));
+            Assert.That(car.NextFloor, Is.EqualTo(0));
+            Assert.That(car.Stops, Is.EqualTo(new[] { 0, 5 }));
+        });
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(0));
+            Assert.That(car.NextFloor, Is.EqualTo(5));
+            Assert.That(car.Stops, Is.EqualTo(new[] { 5 }));
+        });
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(5));
+            Assert.That(car.NextFloor, Is.Null);
+            Assert.That(car.Stops, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void MoveNext_ThreeInitialStops_SetsExpectedState()
+    {
+        var car = TestCar();
+
+        car.AddStop(1);
+        car.AddStop(-1);
+        car.AddStop(2);
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(1));
+            Assert.That(car.NextFloor, Is.EqualTo(2));
+            Assert.That(car.Stops, Is.EqualTo(new[] { 2, -1 }));
+        });
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(2));
+            Assert.That(car.NextFloor, Is.EqualTo(-1));
+            Assert.That(car.Stops, Is.EqualTo(new[] { -1 }));
+        });
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(-1));
+            Assert.That(car.NextFloor, Is.Null);
+            Assert.That(car.Stops, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void MoveNext_ThreeInitialStopsDescending_SetsExpectedState()
+    {
+        var car = TestCar();
+
+        car.AddStop(-2);
+        car.AddStop(1);
+        car.AddStop(-1);
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(-1));
+            Assert.That(car.NextFloor, Is.EqualTo(-2));
+            Assert.That(car.Stops, Is.EqualTo(new[] { -2, 1 }));
+        });
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(-2));
+            Assert.That(car.NextFloor, Is.EqualTo(1));
+            Assert.That(car.Stops, Is.EqualTo(new[] { 1 }));
+        });
+
+        car.MoveNext();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(1));
+            Assert.That(car.NextFloor, Is.Null);
+            Assert.That(car.Stops, Is.Empty);
+        });
+    }
+
+    [Test]
+    public void MoveNext_StopAddedAtCurrentFloor_IgnoresOrHandlesCorrectly()
+    {
+        var car = TestCar();
+        car.AddStop(0);
+
+        car.MoveNext();
+        Assert.Multiple(() =>
+        {
+            Assert.That(car.CurrentFloor, Is.EqualTo(0));
+            Assert.That(car.NextFloor, Is.Null);
+            Assert.That(car.Stops, Is.Empty);
+        });
+    }
+
+    #endregion
+
+
+    private static Car TestCar() => new(1, 0, -2, 10);
 }

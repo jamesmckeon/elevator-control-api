@@ -28,7 +28,7 @@ public sealed class Car : IEquatable<Car>
     public IReadOnlyCollection<sbyte> Stops => GetStops();
 
     public sbyte CurrentFloor { get; private set; }
-    public sbyte? NextFloor { get; private set; }
+    public sbyte? NextFloor => Stops.Count > 0 ? Stops.First() : null;
     private bool? Ascending { get; set; }
     private SortedSet<sbyte> AscendingStops { get; }
     private SortedSet<sbyte> DescendingStops { get; }
@@ -46,11 +46,6 @@ public sealed class Car : IEquatable<Car>
     public override bool Equals(object? obj)
     {
         return Equals(obj as Car);
-    }
-
-    public void MoveToNextFloor()
-    {
-        throw new NotImplementedException();
     }
 
     public void AddStop(sbyte floorNumber)
@@ -81,9 +76,26 @@ public sealed class Car : IEquatable<Car>
 
     private ReadOnlyCollection<sbyte> GetStops()
     {
+        //TODO Refactor This!
+
         // ascending by default if idle
         return !Ascending.HasValue || Ascending == true
             ? AscendingStops.Concat(DescendingStops.Reverse()).ToList().AsReadOnly()
             : DescendingStops.Reverse().Concat(AscendingStops).ToList().AsReadOnly();
+    }
+
+    public void MoveNext()
+    {
+        if (NextFloor.HasValue)
+        {
+            CurrentFloor = NextFloor.Value;
+            RemoveStop(CurrentFloor);
+        }
+    }
+
+    private void RemoveStop(sbyte floorNumber)
+    {
+        DescendingStops.Remove(floorNumber);
+        AscendingStops.Remove(floorNumber);
     }
 }
