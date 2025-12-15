@@ -25,7 +25,7 @@ builder.Services.AddSingleton<ICarRepository, CarRepository>();
 
 var app = builder.Build();
 app.MapControllers();
-app.MapHealthChecks("/api/health");
+app.MapHealthChecks("/api/v1/health");
 // app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment())
