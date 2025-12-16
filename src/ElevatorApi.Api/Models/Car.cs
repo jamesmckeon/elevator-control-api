@@ -136,7 +136,6 @@ public sealed class Car : IEquatable<Car>
         }
     }
 
-
     public void MoveNext()
     {
         lock (_carLock)
@@ -155,30 +154,67 @@ public sealed class Car : IEquatable<Car>
         AscendingStops.Remove(floorNumber);
     }
 
-    public CarFloorDistance GetDistanceFrom(int floorNumber)
+    public CarFloorDistance GetDistanceFrom(sbyte floorNumber)
     {
-        int stopsTil = 0;
-        int distanceFrom = Math.Abs(floorNumber - CurrentFloor);
+        var lastFloor = LastFloorTil(floorNumber);
+        var distance = Math.Abs(floorNumber - (lastFloor ?? CurrentFloor));
+        var stops = StopsTil(floorNumber).Count;
 
-        if (State == CarState.Ascending)
+        return new(stops, distance);
+    }
+
+    /// <summary>
+    /// Returns the closest floor in a car's list of stops to <param name="floorNumber"></param>
+    /// </summary>
+    /// <param name="floorNumber">the floorNumber to evaluate</param>
+    /// <returns>the number of the car's closest stop or null if car has no stops</returns>
+    sbyte? LastFloorTil(sbyte floorNumber)
+    {
+        if (State == CarState.Idle || CurrentFloor == floorNumber)
+            return null;
+
+        // regardless of car direction, if floorNumber is positive
+        // get highest floor below floorNumber
+        // otherwise get lowest floor above floorNumber
+
+        if (floorNumber < 0)
         {
-            // NextFloor has to have a value if 
-            // Car is ascending
-            foreach (var floor in AscendingStops)
+            return Stops.Any(s => s < 0 && s > floorNumber)
+                ? Stops.Where(s => s < 0 && s > floorNumber).Min()
+                : Stops.Max();
+        }
+        else
+        {
+            return Stops.Any(s => s < floorNumber) ? Stops.Where(s => s < floorNumber).Max() : (sbyte)0;
+        }
+    }
+
+    /// <summary>
+    /// Returns the stops a car has to traverse before reaching <param name="floorNumber"/>
+    /// </summary>
+    /// <param name="floorNumber">The floor # to evaluate</param>
+    /// <returns>The list of pending car stops prior to <param name="floorNumber"/>
+    /// or an empty list if car has no stops</returns>
+    List<sbyte> StopsTil(sbyte floorNumber)
+    {
+        if (Stops.Count == 0)
+            return [];
+
+        var stops = new List<sbyte>();
+
+        foreach (var stop in Stops)
+        {
+            if (floorNumber > 0 && stop < floorNumber)
             {
-                if (floor < floorNumber)
-                {
-                    stopsTil++;
-                    distanceFrom = Math.Abs(floor - floorNumber);
-                }
-                else
-                {
-                    break;
-                }
+                stops.Add(stop);
+            }
+            else if (floorNumber < 0 && stop > floorNumber)
+            {
+                stops.Add(stop);
             }
         }
 
-        return new(stopsTil, distanceFrom);
+        return stops;
     }
 
     #endregion

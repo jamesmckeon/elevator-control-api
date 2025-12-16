@@ -489,7 +489,13 @@ public class CarTests
     [TestCase(5, new int[] { 1, 2, 3, 4 }, 4, 1)]
     [TestCase(5, new int[] { 1, 2, 3, 6 }, 3, 2)]
     [TestCase(7, new int[] { 8 }, 0, 7)]
-    public void GetDistanceFrom_Ascending_ReturnsExpected(
+    [TestCase(-1, new int[] { 1 }, 1, 2)]
+    [TestCase(-2, new int[] { 1 }, 1, 3)]
+    [TestCase(-3, new int[] { 1 }, 1, 4)]
+    [TestCase(-5, new int[] { 1, 2 }, 2, 7)]
+    [TestCase(-5, new int[] { 1, 2, -4 }, 3, 1)]
+    [TestCase(-5, new int[] { 1, 2, -6 }, 2, 7)]
+    public void GetDistanceFrom_HasStops_ReturnsExpected(
         int targetFloor,
         int[] stops,
         int expectedStops,
@@ -504,7 +510,7 @@ public class CarTests
             car.AddStop((sbyte)stop);
         }
 
-        var actual = car.GetDistanceFrom(targetFloor);
+        var actual = car.GetDistanceFrom((sbyte)targetFloor);
 
         Assert.Multiple(() =>
         {
