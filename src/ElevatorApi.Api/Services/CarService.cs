@@ -41,63 +41,30 @@ public class CarService : ICarService
 
     public Car CallCar(sbyte floorNumber)
     {
-        //TODO REFACTOR!!!!!!!!!!!!!
-        
         ValidateFloor(floorNumber);
 
-        var cars = CarRepository.GetAll()
+        Car? car = null;
+
+        var carDistances = CarRepository.GetAll().Select(c =>
+            new
+            {
+                Car = c,
+                Distance = c.GetDistanceFrom(floorNumber)
+            }).ToList();
+
+        var fewestStops = carDistances.Where(s =>
+                s.Distance.StopsTil == carDistances.Min(m => m.Distance.StopsTil))
             .ToList();
 
-        Car? car = cars.FirstOrDefault(c =>
-            c.State == CarState.Idle ||
-            c.NextFloor == floorNumber ||
-            c.CurrentFloor == floorNumber);
-
-        if (car == null)
+        if (fewestStops.Count == 1)
         {
-            var enroute = GetEnRouteToFloor(cars.ToList(), floorNumber);
-
-            if (enroute.Count == 1)
-            {
-                car = enroute.Single();
-            }
-            else if (enroute.Count > 1)
-            {
-                var fewestStops = GetFewestStops(enroute);
-
-                if (fewestStops.Count == 1)
-                {
-                    car = fewestStops.Single();
-                }
-                else
-                {
-                    // multiple cars headed towards floorNumber
-                    // return the one with the closest current floor
-                    car = GetWithClosestCurrentFloor(cars.ToList(), floorNumber)
-                        .OrderBy(c => c.Id).First();
-                }
-            }
-            else
-            {
-                // no cars currently headed in direction of floorNumber
-                // return the one with the least stops or the closest
-                // last floor
-                var fewestStops = GetFewestStops(cars);
-
-                if (fewestStops.Count == 1)
-                {
-                    car = fewestStops.Single();
-                }
-                else
-                {
-                    // no cars headed towards floorNumber
-                    // return the one with the closest last stop
-                    car = GetWithClosestLastStop(cars.ToList(), floorNumber)
-                        .OrderBy(c => c.Id).First();
-                }
-            }
+            car = fewestStops.Single().Car;
         }
-        
+        else
+        {
+            car = fewestStops.OrderBy(fs => fs.Distance.DistanceFrom).First().Car;
+        }
+
         car.AddStop(floorNumber);
         return car;
     }

@@ -6,6 +6,10 @@ using System.Diagnostics;
 
 namespace ElevatorApi.Api.Models;
 
+public record CarFloorDistance(int StopsTil, int DistanceFrom)
+{
+}
+
 [DebuggerDisplay("Id = {Id}; Current={CurrentFloor}; Next={NextFloor}")]
 public sealed class Car : IEquatable<Car>
 {
@@ -149,6 +153,32 @@ public sealed class Car : IEquatable<Car>
     {
         DescendingStops.Remove(floorNumber);
         AscendingStops.Remove(floorNumber);
+    }
+
+    public CarFloorDistance GetDistanceFrom(int floorNumber)
+    {
+        int stopsTil = 0;
+        int distanceFrom = Math.Abs(floorNumber - CurrentFloor);
+
+        if (State == CarState.Ascending)
+        {
+            // NextFloor has to have a value if 
+            // Car is ascending
+            foreach (var floor in AscendingStops)
+            {
+                if (floor < floorNumber)
+                {
+                    stopsTil++;
+                    distanceFrom = Math.Abs(floor - floorNumber);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        return new(stopsTil, distanceFrom);
     }
 
     #endregion

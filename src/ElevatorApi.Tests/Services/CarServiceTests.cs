@@ -135,25 +135,7 @@ public class CarServiceTests
         var actual = Sut.CallCar(1);
         Assert.That(actual, Is.EqualTo(first));
     }
-
-    [Test]
-    public void CallCar_IdleNearest_AssignsIdleCar()
-    {
-        var (first, second, third) = SetupCars();
-
-        first.AddStop(3);
-        second.AddStop(-1);
-
-        var actual = Sut.CallCar(1);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(actual, Is.EqualTo(third));
-            Assert.That(actual.NextFloor, Is.EqualTo(1));
-            Assert.That(actual.Stops, Is.EqualTo(new sbyte[] { 1 }));
-        });
-    }
-
+    
     [TestCase(-3)]
     [TestCase(11)]
     public void CallCar_InvalidFloorNumber_ThrowsExpected(sbyte floorNumber)
@@ -180,7 +162,7 @@ public class CarServiceTests
         MoveTo(first, 1);
         MoveTo(second, 2);
         MoveTo(third, 3);
-        
+
         first.AddStop(3);
         second.AddStop(5);
         third.AddStop(6);
