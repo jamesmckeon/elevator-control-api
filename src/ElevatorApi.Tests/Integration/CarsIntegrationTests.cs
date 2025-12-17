@@ -15,7 +15,7 @@ public class CarsIntegrationTests
     private HttpClient Client { get; set; }
     private ElevatorSettings ElevatorSettings { get; set; }
 
-    private const string baseUrl = "/api/v1/cars";
+    private const string baseUrl = "/cars";
 
     [OneTimeSetUp]
     public void OneTimeSetup()
