@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace ElevatorApi.Api.Config;
 
-public sealed class ElevatorSettingsValidator : IValidateOptions<ElevatorSettings>
+internal sealed class ElevatorSettingsValidator : IValidateOptions<ElevatorSettings>
 {
     public ValidateOptionsResult Validate(string? name, ElevatorSettings options)
     {

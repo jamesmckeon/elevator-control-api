@@ -15,7 +15,7 @@ public class CarsIntegrationTests
     private HttpClient Client { get; set; }
     private ElevatorSettings ElevatorSettings { get; set; }
 
-    private const string baseUrl = "/api/v1/cars";
+    private const string baseUrl = "/cars";
 
     [OneTimeSetUp]
     public void OneTimeSetup()
@@ -176,6 +176,37 @@ public class CarsIntegrationTests
 
         Assert.That(response.StatusCode,
             Is.EqualTo(HttpStatusCode.NotFound));
+    }
+
+    #endregion
+
+    #region CallCar
+
+    [Test]
+    public async Task CallCar_ValidFloor_Returns200()
+    {
+        var floorNumber = ElevatorSettings.MinFloor;
+
+        var url = $"{baseUrl}/call/{floorNumber}";
+        var response = await Post(url);
+
+        Assert.That(response.StatusCode,
+            Is.EqualTo(HttpStatusCode.OK));
+
+        var car = await response.Content.ReadFromJsonAsync<CarResponse>();
+
+        Assert.That(car, Is.Not.Null);
+        Assert.That(car.NextFloor, Is.EqualTo(floorNumber));
+    }
+
+    [Test]
+    public async Task CallCar_InvalidFloorNumber_Returns400()
+    {
+        var url = $"{baseUrl}/call/{ElevatorSettings.MinFloor - 1}";
+        var response = await Post(url);
+
+        Assert.That(response.StatusCode,
+            Is.EqualTo(HttpStatusCode.BadRequest));
     }
 
     #endregion

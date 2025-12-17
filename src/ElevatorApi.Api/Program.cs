@@ -2,13 +2,8 @@ using ElevatorApi.Api;
 using ElevatorApi.Api.Config;
 using ElevatorApi.Api.Dal;
 using Microsoft.Extensions.Options;
-using NLog;
-using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Logging.ClearProviders();
-builder.Host.UseNLog();
 
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
@@ -25,8 +20,7 @@ builder.Services.AddSingleton<ICarRepository, CarRepository>();
 
 var app = builder.Build();
 app.MapControllers();
-app.MapHealthChecks("/api/health");
-// app.UseHttpsRedirection();
+app.MapHealthChecks("/health");
 
 if (app.Environment.IsDevelopment())
 {
@@ -35,4 +29,3 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
-

@@ -3,7 +3,7 @@ namespace ElevatorApi.Api.Config;
 /// <summary>
 /// specifies the total count of floors and cars
 /// </summary>
-public sealed class ElevatorSettings
+public class ElevatorSettings
 {
     /// <summary>
     /// the count of cars in the building
