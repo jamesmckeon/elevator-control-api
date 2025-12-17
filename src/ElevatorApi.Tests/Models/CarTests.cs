@@ -535,22 +535,26 @@ public class CarTests
         });
     }
 
-    [TestCase(new[] { 1, 2 })] // Stops above 0
-    [TestCase(new[] { -1, -2 })] // Stops below 0  
-    [TestCase(new[] { 1, -1, 2 })] // Stops in both directions
-    public void GetDistanceFrom_TargetFloorZero_ReturnsExpected(int[] stops)
+    [TestCase(5, new[] { 2, 1 }, 2, 1)] 
+    [TestCase(5, new[] { -1, -2 }, 0, 5)] 
+    [TestCase(5, new[] { 1, -1, 2 }, 2, 1)] // Stops in both directions
+    public void GetDistanceFrom_TargetFloorZero_ReturnsExpected(
+        sbyte startFloor, int[] stops, int expectedStops, int expectedDistance)
     {
         ArgumentNullException.ThrowIfNull(stops);
 
-        var car = new Car(1, 5, -10, 10); // Start at floor 5
+        var car = new Car(1, startFloor, -10, 10);
 
         foreach (var stop in stops)
             car.AddStop((sbyte)stop);
 
         var actual = car.GetDistanceFrom(0);
 
-        // Verify expected behavior for floor 0 specifically
-        Assert.That(actual, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(actual.StopsTil, Is.EqualTo(expectedStops));
+            Assert.That(actual.DistanceFrom, Is.EqualTo(expectedDistance));
+        });
     }
 
     #endregion

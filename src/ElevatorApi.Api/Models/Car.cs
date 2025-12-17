@@ -6,10 +6,6 @@ using System.Diagnostics;
 
 namespace ElevatorApi.Api.Models;
 
-public record CarFloorDistance(int StopsTil, int DistanceFrom)
-{
-}
-
 [DebuggerDisplay("Id = {Id}; Current={CurrentFloor}; Next={NextFloor}")]
 public sealed class Car : IEquatable<Car>
 {
@@ -175,18 +171,23 @@ public sealed class Car : IEquatable<Car>
             if (State == CarState.Idle || CurrentFloor == floorNumber)
                 return null;
 
-            if (floorNumber < 0)
+            bool between(sbyte first, sbyte second) =>
+                floorNumber >= Math.Min(first, second) &&
+                floorNumber <= Math.Max(first, second);
+
+            var withCurrent = new sbyte[] { CurrentFloor }
+                .Concat(Stops)
+                .ToArray();
+
+            for (var i = 0; i < withCurrent.Length - 1; i++)
             {
-                return Stops.Any(s => s < 0 && s > floorNumber)
-                    ? Stops.Where(s => s < 0 && s > floorNumber).Min()
-                    : Stops.Max();
+                if (between(withCurrent[i], withCurrent[i + 1]))
+                {
+                    return withCurrent[i];
+                }
             }
-            else
-            {
-                return Stops.Any(s => s < floorNumber)
-                    ? Stops.Where(s => s < floorNumber).Max()
-                    : (sbyte)0;
-            }
+
+            return withCurrent.Last();
         }
     }
 
@@ -200,21 +201,27 @@ public sealed class Car : IEquatable<Car>
     {
         lock (_carLock)
         {
-            if (Stops.Count == 0)
+            if (State == CarState.Idle || CurrentFloor == floorNumber)
                 return [];
+
+            bool between(sbyte first, sbyte second) =>
+                floorNumber >= Math.Min(first, second) &&
+                floorNumber <= Math.Max(first, second);
+
+            var withCurrent = new sbyte[] { CurrentFloor }
+                .Concat(Stops)
+                .ToArray();
 
             var stops = new List<sbyte>();
 
-            foreach (var stop in Stops)
+            for (var i = 0; i < withCurrent.Length - 1; i++)
             {
-                if (floorNumber > 0 && stop < floorNumber)
+                if (between(withCurrent[i], withCurrent[i + 1]))
                 {
-                    stops.Add(stop);
+                    break;
                 }
-                else if (floorNumber < 0 && stop > floorNumber)
-                {
-                    stops.Add(stop);
-                }
+
+                stops.Add(withCurrent[i]);
             }
 
             return stops;
