@@ -97,7 +97,7 @@
                 }
             }
         },
-        "/cars/call": {
+        "/cars/call/{floorNumber}": {
             "post": {
                 "description": "Calls a car to a floor",
                 "parameters": [
