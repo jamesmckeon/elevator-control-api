@@ -68,7 +68,7 @@ public class CarsController : ControllerBase
             var car = CarService.CallCar(floorNumber);
             return Ok(MapCarResponse(car));
         }
-        catch (ArgumentOutOfRangeException ex)
+        catch (FloorNotFoundException ex)
         {
             return BadRequest(ex.Message);
         }
