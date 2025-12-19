@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorApi.Tests", "Elevat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorApi.Api", "ElevatorApi.Api\ElevatorApi.Api.csproj", "{79C13539-6D9B-492C-82EC-96CFFFFA7768}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorApi.Client", "ElevatorApi.Client\ElevatorApi.Client.csproj", "{B58F9060-A151-4D8C-8946-5A1CE1253531}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{79C13539-6D9B-492C-82EC-96CFFFFA7768}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79C13539-6D9B-492C-82EC-96CFFFFA7768}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79C13539-6D9B-492C-82EC-96CFFFFA7768}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B58F9060-A151-4D8C-8946-5A1CE1253531}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B58F9060-A151-4D8C-8946-5A1CE1253531}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B58F9060-A151-4D8C-8946-5A1CE1253531}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B58F9060-A151-4D8C-8946-5A1CE1253531}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
