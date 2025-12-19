@@ -4,7 +4,7 @@ using ElevatorApi.Api.Config;
 namespace ElevatorApi.Tests.Integration;
 
 [Category("Integration")]
-internal sealed class ThreeCarTests : TestsBase
+internal sealed class MultipleCarsMultipleFloorsTests : TestsBase
 {
     protected override ElevatorSettings ElevatorSettings => new()
     {

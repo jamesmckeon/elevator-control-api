@@ -4,13 +4,13 @@ using ElevatorApi.Api.Config;
 namespace ElevatorApi.Tests.Integration;
 
 [Category("Integration")]
-internal sealed class SingleCarTests : TestsBase
+internal sealed class SingleCarSingleFloorTests : TestsBase
 {
     protected override ElevatorSettings ElevatorSettings => new()
     {
         CarCount = 1,
-        MinFloor = -2,
-        MaxFloor = 10,
+        MinFloor = 0,
+        MaxFloor = 1,
         LobbyFloor = 0
     };
 
@@ -49,7 +49,7 @@ internal sealed class SingleCarTests : TestsBase
     public async Task AddStop_CarExists_ReturnsExpected()
     {
         byte carId = 1;
-        sbyte floorNumber = -2;
+        sbyte floorNumber = 1;
 
         var response = await AddCarStopResponse(carId, floorNumber);
 
@@ -80,7 +80,7 @@ internal sealed class SingleCarTests : TestsBase
     [Test]
     public async Task AddStop_InvalidFloor_ReturnsBadRequest()
     {
-        var response = await AddCarStopResponse(1, -3);
+        var response = await AddCarStopResponse(1, -1);
 
         Assert.That(response.StatusCode,
             Is.EqualTo(HttpStatusCode.BadRequest));
@@ -94,11 +94,10 @@ internal sealed class SingleCarTests : TestsBase
     public async Task MoveCar_CarExists_ReturnsExpected()
     {
         byte carId = 1;
-        sbyte floorNumber = -2;
+        sbyte floorNumber = 1;
 
         // request a car and then move it
         await AddCarStopResponse(carId, floorNumber);
-
         var moveResponse = await MoveCarResponse(carId);
 
         Assert.That(moveResponse.StatusCode,
@@ -130,32 +129,36 @@ internal sealed class SingleCarTests : TestsBase
     #region CallCar
 
     [Test]
-    public async Task CallCar_ValidFloor_ReturnsExpected()
+    public async Task CallCar_ValidFloor_AssignsCar()
     {
-        sbyte firstFloor = -2;
-        sbyte secondFloor = 10;
-
-        var firstResponse = await CallCarResponse(firstFloor);
-        Assert.That(firstResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-
-        var secondResponse = await CallCarResponse(secondFloor);
-        var firstCar = await ParseCar(firstResponse);
-        var secondCar = await ParseCar(secondResponse);
+        var response = await CallCarResponse(1);
+        var car = await ParseCar(response);
 
         Assert.Multiple(() =>
         {
-            // NextFloor for both should be -2, bc the car is currently
-            // parked at the lobby
-            Assert.That(firstCar.NextFloor, Is.EqualTo(firstFloor));
-            Assert.That(secondCar.NextFloor, Is.EqualTo(firstFloor));
-            Assert.That(secondCar.Stops, Does.Contain(secondFloor));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(car.NextFloor, Is.EqualTo(1));
+        });
+    }
+    
+    [Test]
+    public async Task CallCar_LobbyFloor_DoesntAddStop()
+    {
+        // car is parked at lobby by default
+        var response = await CallCarResponse(0); // lobby floor
+        var car = await ParseCar(response);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(car.NextFloor, Is.Null);
         });
     }
 
     [Test]
     public async Task CallCar_InvalidFloorNumber_Returns400()
     {
-        var response = await CallCarResponse(-3);
+        var response = await CallCarResponse(2);
 
         Assert.That(response.StatusCode,
             Is.EqualTo(HttpStatusCode.BadRequest));
