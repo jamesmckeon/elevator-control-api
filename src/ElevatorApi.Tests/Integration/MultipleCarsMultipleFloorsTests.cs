@@ -143,11 +143,5 @@ internal sealed class MultipleCarsMultipleFloorsTests : TestsBase
         Assert.That(assignedCar.Id, Is.EqualTo(carThree.Id));
     }
 
-    [Test]
-    public void Defect6_Fix()
-    {
-        Assert.Fail("Is this still needed?");
-    }
-
     #endregion
 }
