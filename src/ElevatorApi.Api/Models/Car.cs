@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using ElevatorApi.Api.Exceptions;
 
 namespace ElevatorApi.Api.Models;
 
@@ -107,7 +108,7 @@ public sealed class Car : IEquatable<Car>
     /// Adds a stop to the car
     /// </summary>
     /// <param name="floorNumber">the floor # to add to the car's list of stops</param>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown
+    /// <exception cref="FloorNotFoundException">Thrown
     /// when <param name="floorNumber"/> is invalid</exception>
     public void AddStop(sbyte floorNumber)
     {
@@ -138,8 +139,8 @@ public sealed class Car : IEquatable<Car>
     {
         if (floorNumber < FloorRange.MinFloor || floorNumber > FloorRange.MaxFloor)
         {
-            throw new ArgumentOutOfRangeException(nameof(floorNumber),
-                $"floorNumber must be between {FloorRange.MinFloor} and {FloorRange.MaxFloor}.");
+            throw new FloorNotFoundException(nameof(floorNumber),
+                FloorRange.MinFloor, FloorRange.MaxFloor);
         }
     }
 

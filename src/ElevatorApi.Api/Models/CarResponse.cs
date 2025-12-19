@@ -1,7 +1,7 @@
 namespace ElevatorApi.Api.Models;
 
 public record CarResponse(
-    int Id,
+    byte Id,
     sbyte? NextFloor,
     sbyte CurrentFloor,
     IReadOnlyCollection<sbyte> Stops)

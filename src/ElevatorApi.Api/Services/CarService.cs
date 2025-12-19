@@ -63,11 +63,11 @@ public class CarService : ICarService
         var fewestStops = carDistances.Where(s =>
                 s.Distance.StopsTil == carDistances.Min(m => m.Distance.StopsTil))
             .ToList();
-        
+
         car = fewestStops.Count == 1
             ? fewestStops.Single().Car
             : fewestStops.OrderBy(fs => fs.Distance.DistanceFrom).First().Car;
-        
+
         car.AddStop(floorNumber);
         return car;
     }
@@ -76,9 +76,8 @@ public class CarService : ICarService
     {
         if (floorNumber < Settings.Value.MinFloor || floorNumber > Settings.Value.MaxFloor)
         {
-            throw new ArgumentOutOfRangeException(nameof(floorNumber),
-                $"floorNumber must be between {Settings.Value.MinFloor} and " +
-                $"{Settings.Value.MaxFloor}");
+            throw new FloorNotFoundException(nameof(floorNumber),
+                Settings.Value.MinFloor, Settings.Value.MaxFloor);
         }
     }
 }

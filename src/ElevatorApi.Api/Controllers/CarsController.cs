@@ -40,12 +40,16 @@ public class CarsController : ControllerBase
             var car = CarService.AddStop(carId, floorNumber);
             return Ok(MapCarResponse(car));
         }
-        catch (CarNotFoundException ex)
+        catch (CarNotFoundException ex) 
         {
             return NotFound(ex.Message);
         }
+        catch (FloorNotFoundException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
-    
+
     [HttpPost("{carId}/move")]
     public IActionResult MoveCar(byte carId)
     {
@@ -59,7 +63,7 @@ public class CarsController : ControllerBase
             return NotFound(ex.Message);
         }
     }
-    
+
     [HttpPost("call/{floorNumber}")]
     public IActionResult CallCar(sbyte floorNumber)
     {
@@ -68,7 +72,7 @@ public class CarsController : ControllerBase
             var car = CarService.CallCar(floorNumber);
             return Ok(MapCarResponse(car));
         }
-        catch (ArgumentOutOfRangeException ex)
+        catch (FloorNotFoundException ex)
         {
             return BadRequest(ex.Message);
         }

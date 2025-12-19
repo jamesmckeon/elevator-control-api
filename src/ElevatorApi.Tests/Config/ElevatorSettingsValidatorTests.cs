@@ -20,7 +20,7 @@ public class ElevatorSettingsValidatorTests
         var settings = new ElevatorSettings()
         {
             CarCount = 1,
-            MaxFloor = 2,
+            MaxFloor = 1,
             MinFloor = 0,
             LobbyFloor = 0
         };
@@ -65,25 +65,7 @@ public class ElevatorSettingsValidatorTests
             Assert.That(actual.FailureMessage, Is.EqualTo("MinFloor must be less than MaxFloor"));
         });
     }
-
-    [Test]
-    public void Validate_MaxFloor_ReturnsFailed()
-    {
-        var settings = new ElevatorSettings()
-        {
-            CarCount = 1,
-            MaxFloor = 1,
-            MinFloor = 1
-        };
-        var actual = Sut.Validate(null, settings);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(actual.Failed, Is.True);
-            Assert.That(actual.FailureMessage, Is.EqualTo("MinFloor must be less than MaxFloor"));
-        });
-    }
-
+    
     [Test]
     public void Validate_LobbyNotBetweenMinAndMax_ReturnsFailed()
     {

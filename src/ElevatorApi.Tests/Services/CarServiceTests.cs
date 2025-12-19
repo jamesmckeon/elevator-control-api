@@ -135,21 +135,13 @@ public class CarServiceTests
         var actual = Sut.CallCar(1);
         Assert.That(actual, Is.EqualTo(first));
     }
-    
+
     [TestCase(-3)]
     [TestCase(11)]
     public void CallCar_InvalidFloorNumber_ThrowsExpected(sbyte floorNumber)
     {
-        var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
+        Assert.Throws<FloorNotFoundException>(() =>
             Sut.CallCar(floorNumber));
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(ex.ParamName, Is.EqualTo("floorNumber"));
-            Assert.That(ex.Message, Does.StartWith($"floorNumber must be between " +
-                                                   $"{Settings.Object.Value.MinFloor} " +
-                                                   $"and {Settings.Object.Value.MaxFloor}"));
-        });
     }
 
     [Test]

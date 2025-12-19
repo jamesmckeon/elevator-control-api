@@ -14,6 +14,7 @@ public interface ICarService
     /// <param name="floorNumber">the floor to add to the car's stops</param>
     /// <returns>the affected car</returns>
     /// <exception cref="CarNotFoundException"/>
+    /// <exception cref="FloorNotFoundException"/>
     Car AddStop(byte carId, sbyte floorNumber);
 
     /// <summary>
@@ -29,7 +30,6 @@ public interface ICarService
     /// list of stops
     /// </summary>
     /// <param name="floorNumber">The floor the car should stop at</param>
-    /// <exception cref="ArgumentOutOfRangeException">Throw when <param name="floorNumber"></param>
-    /// is invalid </exception>
+    /// <exception cref="FloorNotFoundException"/>
     Car CallCar(sbyte floorNumber);
 }

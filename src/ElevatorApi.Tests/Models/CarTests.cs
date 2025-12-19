@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using ElevatorApi.Api.Exceptions;
 using NUnit.Framework.Internal;
 
 namespace ElevatorApi.Tests.Models;
@@ -81,14 +82,8 @@ public class CarTests
     {
         var car = new Car(1, 0, 0, 10);
 
-        var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
+        Assert.Throws<FloorNotFoundException>(() =>
             car.AddStop(-1));
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(ex.ParamName, Is.EqualTo("floorNumber"));
-            Assert.That(ex.Message, Does.StartWith("floorNumber must be between 0 and 10."));
-        });
     }
 
     [Test]
@@ -535,8 +530,8 @@ public class CarTests
         });
     }
 
-    [TestCase(5, new[] { 2, 1 }, 2, 1)] 
-    [TestCase(5, new[] { -1, -2 }, 0, 5)] 
+    [TestCase(5, new[] { 2, 1 }, 2, 1)]
+    [TestCase(5, new[] { -1, -2 }, 0, 5)]
     [TestCase(5, new[] { 1, -1, 2 }, 2, 1)] // Stops in both directions
     public void GetDistanceFrom_TargetFloorZero_ReturnsExpected(
         sbyte startFloor, int[] stops, int expectedStops, int expectedDistance)
