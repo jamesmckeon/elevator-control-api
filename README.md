@@ -1,10 +1,10 @@
 # Elevator Control System API
 
-A RESTful API for managing elevator control systems, designed to provide integration testing capabilities for dependent teams.
+A RESTful elevator control system API for integration/E2E testing
 
 ## Prerequisites
 
-- .NET 9.0 SDK
+- [.NET 9.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 
 ## Quick Start
 
@@ -19,102 +19,145 @@ The API will be available at `http://localhost:8080`
 
 ## Configuration
 
-The elevator system can be configured in `src/ElevatorApi.Api/appsettings.json`:
+The elevator system can be configured in `src/ElevatorApi.Api/appsettings.json`.  The default configuration is listed below:
 
 ```json
 {
   "ElevatorSettings": {
-    "MinFloor": -2,        // Minimum valid floor number
-    "MaxFloor": 50,        // Maximum valid floor number
-    "NumberOfCars": 3,      // Number of elevator cars in the system
-    "LobbyFloor": 0.       // The start floor for all cars 
+    "CarCount": 2,         // Number of elevator cars in the system
+    "MinFloor": -1,        // Minimum valid floor number
+    "MaxFloor": 5,         // Maximum valid floor number
+    "lobbyFloor": 0        // The start floor for all cars
   }
 }
 ```
 
-Modify these values to test different building configurations without recompiling.
-
 ## API Endpoints
+
+- endpoint details can be browsed via the swagger ui available at [http://localhost:8080/swagger]
+- api health can be checked via the /health endpoint
+
+### CarResponse Object
+
+All endpoints return a `CarResponse` object with the following structure:
+
+```json
+{
+  "id": 1,           // Unique identifier for the elevator car
+  "currentFloor": 0,    // Current floor position of the car
+  "nextFloor": null,    // Next scheduled floor (null if no stops)
+  "stops": []           // All stops assigned to the car, in order
+}
+```
 
 ### Get Car State
 
 ```bash
-# Get current state of a specific car
-curl http://localhost:8080/api/cars/1
+# Get current state of car #1
+curl http://localhost:8080/cars/1
 ```
 
-**Response:**
+**Response Codes:**
 
-```json
-{
-  "carId": 1,
-  "currentFloor": 0,
-  "direction": "idle",
-  "nextFloor": null,
-  "origins": [],
-  "destinations": []
-}
-```
+- `200 OK` - Car state retrieved successfully
+- `404 Not Found` - Invalid car ID
 
 ### Request Pickup
 
 ```bash
 # Request an elevator to pick up at floor 5
-curl -X PUT "http://localhost:8080/api/pickup-requests?floorNumber=5"
+curl -X POST "http://localhost:8080/cars/call/5"
 ```
 
-### Add Destination
+**Response Codes:**
+
+- `200 OK` - Pickup request processed successfully
+- `400 Bad Request` - Invalid floor number
+
+### Add Stop to Car
 
 ```bash
-# Add destination floor 10 to car 1
-curl -X PUT http://localhost:8080/api/cars/1/destinations/10
+# Add a stop at floor 4 to car 1
+curl -X POST http://localhost:8080/cars/1/stops/4
 ```
+
+**Response Codes:**
+
+- `200 OK` - Stop added successfully
+- `400 Bad Request` - Invalid floor number
+- `404 Not Found` - Invalid car ID
 
 ### Advance Car
 
 ```bash
-# Move car 1 to its next floor
-curl -X POST http://localhost:8080/api/cars/1/advance
+# Move car 1 to its next stop
+curl -X POST http://localhost:8080/cars/1/move
 ```
 
-## Testing Strategy
+**Response Codes:**
 
-### Unit Tests
+- `200 OK` - Car advanced successfully
+- `404 Not Found` - Invalid car ID
 
-- **Services**: Business logic and elevator algorithms
-- **Repositories**: Data access and car management
-- **Validators**: Configuration and input validation
+## Demo Client
 
-### Integration Tests
+A demo client application is included to demonstrate API usage and test the elevator system.
 
-- **Full API workflows**: End-to-end request/response testing using WebApplicationFactory
-- **Controller coverage**: Achieved through integration tests (controllers are thin pass-through layers)
+### Running the Demo Client
+
+Make sure the API is running first (see [Quick Start](#quick-start)), then in a separate terminal:
+
+```bash
+cd src/ElevatorApi.Client
+dotnet run
+```
+
+The demo client will connect to the API at `http://localhost:8080` and demonstrate various elevator operations.
+
+## Testing
 
 Run tests:
+
 ```bash
 cd src/ElevatorApi.Tests
 dotnet test
 ```
 
-## Project Structure
+Run by category:
 
-```
-src/
-├── ElevatorApi.Api/
-│   ├── Controllers/      # API endpoints
-│   ├── Services/         # Business logic
-│   ├── Dal/              # Data access (repositories)
-│   ├── Models/           # Domain models
-│   └── Config/           # Configuration classes
-└── ElevatorApi.Tests/
-    ├── Controllers/      # Integration tests
-    ├── Services/         # Unit tests for services
-    ├── Dal/              # Unit tests for repositories
-    └── Config/           # Unit tests for configuration
+```bash
+  dotnet test --filter Category=Unit
+  dotnet test --filter Category=Integration
 ```
 
-## Architecture Decisions
+## Car Assignment Algorithm
 
-- **In-memory storage**: Using `ConcurrentDictionary` for thread-safe car state management
-- **No async/await**: All operations are synchronous (in-memory only, no I/O)
-- **Configuration-based**: Building parameters configurable for testing different scenarios
+The system uses the following rules when assigning a car to a requested pickup floor, towards minimizing passenger wait time.
+
+### Assignment Priority
+
+#### 1. Idle Cars First
+
+Idle cars (cars with no assigned stops) are always assigned first when available. If multiple idle cars exist, the closest one is selected.
+
+#### 2. Busy Car Selection
+
+When no idle cars are available, the system selects the optimal car using these criteria:
+
+1. **Primary criterion**: Car with fewest stops before reaching the called floor
+2. **Tiebreaker**: Car whose nearest existing stop is closest to the called floor
+3. **Rationale**: Door opening/closing cycles impact wait time more than travel distance
+
+### Example Scenario
+
+When a pickup is requested at floor 5:
+
+- **Car 1**: `stops [1, 2]` → 2 stops before floor 5, nearest stop is 2 (3 floors away)
+- **Car 2**: `stops [12, 9, 7]` → 3 stops before floor 5, nearest stop is 7 (2 floors away)
+- **Car 3**: `stops [10, 7]` → 2 stops before floor 5, nearest stop is 7 (2 floors away) ✓
+
+**Result**: Car 3 is assigned (tied with Car 1 on stop count at 2 stops, but Car 3's nearest stop at floor 7 is closer to floor 5 than Car 1's nearest stop at floor 2)
+
+### Idle Behavior
+
+Cars remain stationary at their current floor when idle, rather than returning to a home/lobby position.
