@@ -1,6 +1,36 @@
 # Elevator Control System API
 
-A RESTful elevator control system API for integration/E2E testing
+An open-source RESTful elevator control system API for testing client applications and service-to-service integration.
+
+> **Origin**: This project was originally developed as a technical assignment for a job application and has been released as an open-source testing tool.
+
+## Overview
+
+This API provides a fully functional elevator control system that you can run locally to test:
+- Client applications that interact with elevator systems
+- Service-to-service integration patterns
+- RESTful API consumption
+- Real-time state management scenarios
+- Complex assignment algorithms
+
+**Key Design Decisions for Testing Use:**
+- **In-memory storage** - No database setup required, runs immediately with `dotnet run`
+- **Zero external dependencies** - No Redis, message queues, or cloud services needed
+- **Configurable** - Adjust car count and floor range via `appsettings.json`
+- **Stateless** - Resets on restart, ensuring clean test runs
+- **Comprehensive API** - Supports both direct car control and intelligent car assignment
+
+## Intentional Scope Limitations
+
+This API focuses on core elevator control logic and testing utility. It **intentionally excludes**:
+
+- **Database persistence** - In-memory storage keeps setup simple; production systems would use SQL Server/PostgreSQL
+- **Authentication** - No API keys or JWT tokens required for ease of testing
+- **Cloud deployment** - Runs locally; Docker/Kubernetes configs not included
+- **Advanced middleware** - No rate limiting, caching, or API versioning
+- **Logging infrastructure** - Basic `ILogger` only
+
+These exclusions make the API lightweight and immediately usable for testing purposes.
 
 ## Prerequisites
 
